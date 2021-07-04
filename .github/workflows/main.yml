@@ -1,0 +1,29 @@
+name: Rebase
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Automatic rebase
+    runs-on: ubuntu-20.04
+    steps:
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install git
+    - name: Rebase
+      run: |
+        git config --global user.name "${GITHUB_USER}"
+        git config --global user.email "${GITHUB_EMAIL}"
+        git clone https://"${GITHUB_USER}":"${GITHUB_TOKEN}"@github.com/los-modded/android_bootable_recovery.git -b lineage-18.1
+        cd android_bootable_recovery
+        git fetch https://github.com/LineageOS/android_bootable_recovery.git lineage-18.1
+        git rebase FETCH_HEAD
+        git push -f
+      env:
+        GITHUB_EMAIL: ${{ secrets.EMAIL }}
+        GITHUB_TOKEN: ${{ secrets.TOKEN }}
+        GITHUB_USER: ${{ secrets.USERNAME }}
